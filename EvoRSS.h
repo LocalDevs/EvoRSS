@@ -11,5 +11,5 @@ public:
     EvoRSS(QWidget *parent = Q_NULLPTR);
 
 private:
-    Ui::EvoRSSClass ui_{};
+    Ui::EvoRSSClass mainUI_{};
 };
