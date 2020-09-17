@@ -12,4 +12,6 @@ public:
 
 private:
     Ui::EvoRSSClass mainUI_{};
+    void CreateMenu() const;
+    void CreateStatusBar() const;
 };

@@ -25,6 +25,9 @@
     <Filter Include="UI">
       <UniqueIdentifier>{9ffade16-0761-41b1-bfa4-5f82cbc7766f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DBase">
+      <UniqueIdentifier>{b89cf90e-bb75-4129-8fb7-a0ad4a7a3905}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="EvoRSS.qrc">
@@ -47,5 +50,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+    <None Include="DBase\EvoRSS.db">
+      <Filter>DBase</Filter>
+    </None>
   </ItemGroup>
 </Project>

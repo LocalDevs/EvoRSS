@@ -1,49 +1,78 @@
 #include "EvoRSS.h"
 #include <QMenu>
 #include <QMenuBar>
+#include <QLabel>
+#include <memory>
 
+//TODO : figure out how to use smarpointers : don't use static if possible
+
+std::unique_ptr<QLabel> Lab1, Lab2, Lab3;
 
 EvoRSS::EvoRSS(QWidget *parent) : QMainWindow(parent)
 {
     mainUI_.setupUi(this);
+	auto stat = statusBar();
 
-	// adding menus & subMenus
-	auto mainMenu = mainUI_.menuBar;
+	//Create The Menu & Status Bar
+	this->CreateMenu();
+	this->CreateStatusBar();	
+}
 
-	//File
-	auto FileMenu = mainMenu->addMenu("&File");
-		//SubMenu
-		FileMenu->addAction(new QAction{ "&Import Feeds" });
-		FileMenu->addAction(new QAction{ "&Export Feeds" });
-		FileMenu->addSeparator();
-		FileMenu->addAction(new QAction{ "&Create BackUp" });
-		FileMenu->addSeparator();
-		FileMenu->addAction(new QAction{ "&Quit" });
+void EvoRSS::CreateStatusBar() const
+{
 	
+	auto statusBar = this->statusBar();
+	Lab1 = std::make_unique<QLabel>(tr("Db Cnx : Ok"));
+	Lab1->setFixedWidth(350);
+	Lab1->setAlignment(Qt::AlignLeft);
+	statusBar->addPermanentWidget(Lab1.get());
+
+	Lab2 = std::make_unique<QLabel>(tr("Unread : 150"));
+	Lab2->setFixedWidth(350);
+	Lab2->setAlignment(Qt::AlignCenter);
+	statusBar->addPermanentWidget(Lab2.get());
+
+	Lab3 = std::make_unique<QLabel>(tr("Group : C++"));
+	Lab3->setFixedWidth(350);
+	Lab3->setAlignment(Qt::AlignRight);
+	statusBar->addPermanentWidget(Lab3.get());
+}
+
+void EvoRSS::CreateMenu() const
+{
+	auto mainMenu = menuBar();
+	
+	auto fileMenu = mainMenu->addMenu("&File");
+	//SubMenu
+	fileMenu->addAction(new QAction{ "&Import Feeds" });
+	fileMenu->addAction(new QAction{ "&Export Feeds" });
+	fileMenu->addSeparator();
+	fileMenu->addAction(new QAction{ "&Create BackUp" });
+	fileMenu->addSeparator();
+	fileMenu->addAction(new QAction{ "&Quit" });
+
 	//Feed Menu
-	auto FeedMenu = menuBar()->addMenu("&Feeds");
-		//SubMenu
-		FeedMenu->addAction(new QAction{ "&Add Feed" });
-		FeedMenu->addAction(new QAction{ "&Update Feed" });
-		FeedMenu->addAction(new QAction{ "&Update All" });
-		FeedMenu->addSeparator();
-		FeedMenu->addAction(new QAction{ "&Mark Read" });
-		FeedMenu->addAction(new QAction{ "&Mark All Feeds Read" });
-		FeedMenu->addSeparator();
-		FeedMenu->addAction(new QAction{ "&Delete" });
-		FeedMenu->addSeparator();
-		FeedMenu->addAction(new QAction{ "&Feeds Properties" });
+	auto feedMenu = mainMenu->addMenu("&Feeds");
+	//SubMenu
+	feedMenu->addAction(new QAction{ "&Add Feed" });
+	feedMenu->addAction(new QAction{ "&Update Feed" });
+	feedMenu->addAction(new QAction{ "&Update All" });
+	feedMenu->addSeparator();
+	feedMenu->addAction(new QAction{ "&Mark Read" });
+	feedMenu->addAction(new QAction{ "&Mark All Feeds Read" });
+	feedMenu->addSeparator();
+	feedMenu->addAction(new QAction{ "&Delete" });
+	feedMenu->addSeparator();
+	feedMenu->addAction(new QAction{ "&Feeds Properties" });
 
 	//News
-	auto NewsMenu = mainMenu->addMenu("&News");
-		//SubMenu
-		NewsMenu->addAction(new QAction{ "&Mark All News Read" });
-		NewsMenu->addSeparator();
-		NewsMenu->addAction(new QAction{ "&Filters" });
-		NewsMenu->addAction(new QAction{ "&Sort By" });
-		NewsMenu->addSeparator();
-		NewsMenu->addAction(new QAction{ "&Delete" });
-		NewsMenu->addAction(new QAction{ "&Delete All News" });
-
-	
+	auto newsMenu = mainMenu->addMenu("&News");
+	//SubMenu
+	newsMenu->addAction(new QAction{ "&Mark All News Read" });
+	newsMenu->addSeparator();
+	newsMenu->addAction(new QAction{ "&Filters" });
+	newsMenu->addAction(new QAction{ "&Sort By" });
+	newsMenu->addSeparator();
+	newsMenu->addAction(new QAction{ "&Delete" });
+	newsMenu->addAction(new QAction{ "&Delete All News" });
 }
