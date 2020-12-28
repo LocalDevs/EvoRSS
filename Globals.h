@@ -11,15 +11,28 @@ enum FieldType
 	_INT = 0,
 	_DOUBLE,
 	_STRING,
-	_LIST,
+	_LIST,     //this means it is a list of Feeds or News
+	_ELEMENT,  //this means it is a line representing Feed or News
 	_DATE
 };
 
+typedef  std::tuple<int, FieldType, std::any> DBObjType;
+
+//template <typename T>
 struct DBObjetct
 {
-	std::vector <std::pair<FieldType, std::any>> elements;
+	//typedef T value_type;
+	std::vector <std::tuple<int, FieldType, std::any>> elements;
 };
 
+namespace
+{
+	int MonthToInt(const std::string& stringValue)
+	{
+		std::vector<std::string> innerList{ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+		return 1 + std::distance(innerList.begin(), std::find(innerList.begin(), innerList.end(), stringValue));
+	}
+};
 
 
 class ITags
@@ -34,39 +47,25 @@ class FeedTags : public ITags
 public:
 
 	static const int Title = 1;
-	static const int Link = 2;
-	static const int Description = 3;
-	static const int UpdatePeriod = 4;
-	static const int UpdateFrequency = 5;
+	static const int LinkHomePage = 2;
+	static const int RssFeed = 3;
+	static const int Description = 4;
+	static const int UpdatePeriod = 5;
+	static const int UpdateFrequency = 6;
+	static const int ArticleList = 7;			//this means it is a list of News(articles) inside the Feed Object
+
+	static const int MAX_ID = 8;
 };
 
 class NewsTags : public ITags
 {
 public:
 
-	static const int Title = 1;
-	static const int Link = 2;
-	static const int PubDate = 3;
-	static const int Category = 4;
+	static const int Title = FeedTags::MAX_ID + 1;
+	static const int Link = FeedTags::MAX_ID + 2;
+	static const int PubDate = FeedTags::MAX_ID + 3;
+	static const int Category = FeedTags::MAX_ID + 4;
 };
-
-//enum class FeedTags
-//{
-//	Error = -1,
-//	Title,
-//	Link,
-//	Description,
-//	UpdatePeriod,
-//	UpdateFrequency
-//};
-
-//enum class NewsTags
-//{
-//	Title,
-//	Link,
-//	PubDate,
-//	Category
-//};
 
 //get the string from the underlying pointer
 std::string wcharToString(const wchar_t* val);
@@ -84,7 +83,7 @@ int stringToEnum(std::string stringValue)
 	if (std::is_base_of<FeedTags, T>::value)
 	{
 		if (stringValue == "title")				return FeedTags::Title;
-		if (stringValue == "link")				return FeedTags::Link;
+		if (stringValue == "link")				return FeedTags::LinkHomePage;
 		if (stringValue == "description")		return FeedTags::Description;
 		if (stringValue == "updateperiod")		return FeedTags::UpdatePeriod;
 		if (stringValue == "updatefrequency")	return FeedTags::UpdateFrequency;
@@ -99,8 +98,9 @@ int stringToEnum(std::string stringValue)
 		/*Case no mapping could be found*/		return NewsTags::Error;
 	}
 	else
-		/*Case a non handled enum type*/		return - 1;
+		/*Case a non handled enum type*/		return -1;
 }
 
+//TODO: to review with US-7
 //Database Querries
-bool executeInsert(std::string insert_Qry, DBObjetct params);
+//bool executeInsert(std::string insert_Qry, DBObjetct params);

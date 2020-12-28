@@ -19,11 +19,12 @@ void getTruncatedElement(std::string& _srcStr)
 		[](const char c) {return c == '\n' || c == '\t'; }), _srcStr.end());
 }
 
-bool executeInsert(std::string insert_Qry, DBObjetct params)
-{
-	return DBConnection::GetConnection()->insertQuery(std::move(insert_Qry), params);
-	
-}
+//TODO: to review with US-7
+
+//bool executeInsert(std::string insert_Qry, DBObjetct params)
+//{
+//	return DBConnection::GetConnection()->insertQuery(std::move(insert_Qry), params);
+//}
 
 
 

@@ -15,28 +15,40 @@ public:
 		return this;
 	}
 
+	std::string getTitle() { return this->title; }
+
+
 	News* Link(const std::string _link)
 	{
 		this->link = _link;
 		return this;
 	}
 
-	News* PubDate(const QDateTime _pubDate)
+	std::string getLink() { return this->link; }
+
+
+	News* PubDate(const QDate _pubDate)
 	{
 		this->pubDate = _pubDate;
 		return this;
 	}
+
+	QDate getPubDate() { return this->pubDate; }
+
 
 	News* AddCategorie(const std::string _category)
 	{
 		this->categories.push_back(_category);
 		return this;
 	}
+
+	std::list<std::string> getCategorie() { return this->categories; }
+
 	
 private:
 	int id;
 	std::string title;
 	std::string link;
 	std::list<std::string> categories;
-	QDateTime pubDate;
+	QDate pubDate;
 };

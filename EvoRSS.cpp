@@ -1,7 +1,7 @@
 #include "EvoRSS.h"
 #include <QMenu>
 #include <QMenuBar>
-#include <QLabel>
+
 #include <memory>
 #include "Add_Feed.h"
 
@@ -61,11 +61,11 @@ void EvoRSS::CreateMenu()
 
 		//Adding Feed CallFunction
 		auto lamb = []() {
-			Add_Filter x = new Add_Filter();
+			Add_Feed x = new Add_Feed();
 			x.exec();
 		};
 
-		//Add_Filter x = new Add_Filter();
+		//Add_Feed x = new Add_Feed();
 		connect(addFeed.get(), &QAction::triggered, qApp, lamb);
 
 	feedMenu->addAction(new QAction{ "&Update Feed" });

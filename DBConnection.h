@@ -21,8 +21,10 @@ public:
 	//TODO : this function is to be modified to SetConnection
 	static DBConnection* GetConnection(std::string dbPath, char* zErrMsg);
 
+	//TODO: to review with US-7
+
 	//INSERT Queries
-	bool insertQuery(const std::string insertSql, DBObjetct params);
+	//bool insertQuery(const std::string insertSql, DBObjetct params);
 	
 	bool executeQuery(const std::string sql, sqlite3_callback callback, char*& zErrMsg);
 	

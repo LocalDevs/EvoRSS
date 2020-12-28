@@ -68,6 +68,9 @@
     <ClCompile Include="Globals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="InfoFeed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -92,9 +95,15 @@
     <ClInclude Include="Globals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InfoFeed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="Add_Feed.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Infos_Feed.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

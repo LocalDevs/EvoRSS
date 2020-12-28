@@ -1,9 +1,13 @@
+#include <QMessageBox>
+#include <QString>
+
 #include "Add_Feed.h"
 #include "Feeds.h"
 #include "news.h"
-#include <QMessageBox>
-#include <QString>
 #include "Globals.h"
+#include "InfoFeed.h"
+
+
 
 // Dependencies for XML parsing process
 #pragma comment(lib, "xmllite.lib")
@@ -19,7 +23,7 @@
 
 
 
-Add_Filter::Add_Filter(QWidget* parent) : QDialog(parent)
+Add_Feed::Add_Feed(QWidget* parent) : QDialog(parent)
 {
 	auto lamb = []() {
 		QMessageBox msgBox;
@@ -32,16 +36,16 @@ Add_Filter::Add_Filter(QWidget* parent) : QDialog(parent)
 
 	connect(BtnFinish, &QPushButton::clicked,
 		[=]() {
-			std::string str = R"(https://akrzemi1.wordpress.com/feed/)";//FeedPath->text().toLocal8Bit().constData();
-			return(AddNewFeed(str));
+			//std::string str = R"(https://blog.panicsoftware.com/feed/)";			
+			return(AddNewFeed(FeedPath->text().toLocal8Bit().constData()));
 		});
 }
 
-Add_Filter::~Add_Filter()
+Add_Feed::~Add_Feed()
 {
 }
 
-bool Add_Filter::AddNewFeed(std::string feedPath)
+bool Add_Feed::AddNewFeed(std::string feedPath)
 {
 	const char* URL = feedPath.c_str();
 	IStream* stream;
@@ -51,7 +55,7 @@ bool Add_Filter::AddNewFeed(std::string feedPath)
 	if (FAILED(hr = getURL(nullptr, URL, &stream, 0, nullptr)))
 		return false;
 
-	IXmlReader* rdr;
+	IXmlReader* rdr = nullptr;
 	if (FAILED(hr = CreateXmlReader(__uuidof(IXmlReader), reinterpret_cast<void**>(&rdr), 0)))
 		return false;
 
@@ -82,9 +86,15 @@ bool Add_Filter::AddNewFeed(std::string feedPath)
 			auto strElement = std::string(wstrElement.begin(), wstrElement.end());
 
 			if (element && !strElement.compare("channel"))
+			{
 				_isFeed = true;
+				_isArticle = false;
+			}
 			else if (element && !strElement.compare("item"))
+			{
 				_isArticle = true;
+				_isFeed = false;
+			}
 		}
 
 		break;
@@ -103,30 +113,26 @@ bool Add_Filter::AddNewFeed(std::string feedPath)
 			auto value = wcharToString(val);
 			getTruncatedElement(value);
 
-			if (_isFeed && _isArticle)
-			{
-				_mappingError = true;
-				//TODO : Add Log Instance - description isFeed and isArticle are both true - can't have both cases on same Time
-				return false;
-			}
+			//Due to complexity of the xml content it is difficult to say when we are not
+			//in a feed as some elements may be contained in both feed & Articles 
+			//and some of the feed may not be present as Update Frequency & Hours
 
 			if (_isFeed)
 			{
 				switch (stringToEnum<FeedTags>(wcharToString(element)))
 				{
 				case FeedTags::Title:
-					if (_feed)
+					//Ignore all the title elements if the _feed object is already created
+					//as the read url feed may contain many title elements for the channel
+					if (!_feed)
 					{
-						_mappingError = true;
-						//TODO : Add Log Instance - the isFeed was set to false after the first read of title - how did we get here ?
-						return false;
+						_feed = std::make_unique<Feeds>(feedPath);
+						_feed->Title(value);
 					}
-					_feed = std::make_unique<Feeds>();
-					_feed->Title(value);
 					break;
 
-				case FeedTags::Link:
-					_feed->Link(value);
+				case FeedTags::LinkHomePage:
+					_feed->LinkHomePage(value);
 					break;
 
 				case FeedTags::Description:
@@ -139,7 +145,6 @@ bool Add_Filter::AddNewFeed(std::string feedPath)
 
 				case FeedTags::UpdateFrequency:
 					_feed->UpdateFreq(value);
-					_isFeed = false;
 					break;
 				default:
 					break;
@@ -166,11 +171,19 @@ bool Add_Filter::AddNewFeed(std::string feedPath)
 					break;
 				case NewsTags::PubDate:
 					//TODO : cast the value to QDateTime
-					//article.get()->PubDate(value);
+					QString str =  value.c_str();
+					QStringList dateList = str.split(",")[1].split("+")[0].split(" ");
+					dateList.removeAll(" ");
+					
+					_article->PubDate(
+						QDate(dateList[3].toInt(), MonthToInt(dateList[2].toStdString()), dateList[1].toInt())
+						/*QDateTime(
+							QDate(dateList[].toInt(), MonthToInt(dateList[1].toStdString()), dateList[0].toInt()),
+							QTime(22, 10, 0)
+						)*/
+					);			
+					
 					break;
-				deafult:
-					break;
-
 				}
 			}
 		}
@@ -199,14 +212,21 @@ bool Add_Filter::AddNewFeed(std::string feedPath)
 	stream->Release();
 	rdr->Release();
 
-	DBObjetct params;	
-	params.elements.emplace_back(std::make_pair(FieldType::_STRING, std::forward<std::string>(_feed->getTitle())));
-	params.elements.emplace_back(std::make_pair(FieldType::_STRING, std::forward<std::string>(_feed->getLink())));
-	params.elements.emplace_back(std::make_pair(FieldType::_STRING, std::forward<std::string>(_feed->getDescription())));
-	params.elements.emplace_back(std::make_pair(FieldType::_STRING, std::forward<std::string>(_feed->getUpdFreq())));
-	params.elements.emplace_back(std::make_pair(FieldType::_STRING, std::forward<std::string>(_feed->getUpdPeriod())));
+	DBObjetct params;
+	params.elements.emplace_back(std::make_tuple(FeedTags::Title, FieldType::_STRING, std::forward<std::string>(_feed->getTitle())));
+	params.elements.emplace_back(std::make_tuple(FeedTags::LinkHomePage, FieldType::_STRING, std::forward<std::string>(_feed->getLinkHomePage())));
+	params.elements.emplace_back(std::make_tuple(FeedTags::Description, FieldType::_STRING, std::forward<std::string>(_feed->getDescription())));
+	params.elements.emplace_back(std::make_tuple(FeedTags::UpdateFrequency, FieldType::_STRING, std::forward<std::string>(_feed->getUpdFreq())));
+	params.elements.emplace_back(std::make_tuple(FeedTags::UpdatePeriod, FieldType::_STRING, std::forward<std::string>(_feed->getUpdPeriod())));
+	params.elements.emplace_back(std::make_tuple(FeedTags::RssFeed, FieldType::_STRING, std::forward<std::string>(_feed->getRSS())));
+	params.elements.emplace_back(std::make_tuple(FeedTags::ArticleList, FieldType::_LIST, DBObjetct(_feed->getNewsAsDBObject())));
 
-	executeInsert("INSERT INTO TMP(feed_title, feed_link, feed_description, feed_updateFrequency, feed_updatePeriod) VALUES (?, ?, ?, ?, ?)", params);
+	////View the summary of what we retrieved
+	std::unique_ptr<InfoFeed> _infoDlg = std::make_unique<InfoFeed>(params);
+	_infoDlg.get()->exec();
+
+	//TODO: to review with US-7
+	//executeInsert("INSERT INTO TMP(feed_title, feed_link, feed_description, feed_updateFrequency, feed_updatePeriod) VALUES (?, ?, ?, ?, ?)", params);
 	return S_OK;
 
 }
