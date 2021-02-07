@@ -4,6 +4,14 @@
 #include <any>
 #include <vector>
 
+namespace macro_QSQlDB
+{
+#define DB_BEGIN_TRANSACT QSqlDatabase::database().transaction();
+#define DB_COMMIT_TRANSACT QSqlDatabase::database().commit();
+#define DB_ROLLBACK_TRANSACT QSqlDatabase::database().rollback();
+	int a = 0;
+}
+
 //Enum used for the elements type
 // of the elements vector
 enum FieldType

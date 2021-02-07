@@ -2,22 +2,25 @@
 #include "Callbacks.h"
 #include <sqlite3.h>
 #include <utility>
+#include <QString>
+#include <QtSql/QSqlError>
 
+#include "Globals.h"
 
 
 DBConnection* DBConnection::theCnx = nullptr;
 
 //Ctor & Dtor
-DBConnection::DBConnection(std::string path, char* zErrMsg) : _dbPath(std::move(path))
+DBConnection::DBConnection(const std::string &path, char* zErrMsg) : _dbPath(path)
 {
-	// Save the connection result
-	int result = sqlite3_open(_dbPath.c_str(), &_theDb);
+	QString str = "QSQLITE";
+	m_db = QSqlDatabase::addDatabase(str);
+	m_db.setDatabaseName(path.c_str());
 
-	if (result)
-		zErrMsg = const_cast<char*>(sqlite3_errmsg(_theDb));
-	else
-		zErrMsg = nullptr;
+	if (!m_db.open())
+		auto err = m_db.lastError().text();
 }
+
 DBConnection::~DBConnection()
 {
 	closeConnection();
@@ -37,12 +40,12 @@ DBConnection* DBConnection::GetConnection(char* zErrMsg)
 	return theCnx;
 }
 
-//TODO: Chnage the name to SetConnection
-DBConnection* DBConnection::GetConnection(std::string dbPath, char* zErrMsg)
+
+DBConnection* DBConnection::SetConnection(const std::string& dbPath, char* zErrMsg)
 {
 	if (theCnx == nullptr)
 	{
-		theCnx = new DBConnection(std::move(dbPath), zErrMsg);
+		theCnx = new DBConnection(dbPath, zErrMsg);
 	}
 
 	return theCnx;
