@@ -1,7 +1,9 @@
 #pragma once
 #include <sqlite3.h>
+#include <QtSql/QSqlQuery>
 #include <string>
-#include "Globals.h"
+
+struct DBObjetct;
 
 class DBConnection
 {
@@ -9,17 +11,19 @@ public:
 
 	//Delete default Ctor
 	DBConnection() = delete;
+	
 	//Delete Copy Ctor & Assignment
 	DBConnection(const DBConnection& srcConnection) = delete;
 	DBConnection& operator = (const DBConnection& srcConnection) = delete;
+
 	//Delete Move Ctor & Assignment
 	DBConnection(const DBConnection&& srcConnection) = delete;
 	DBConnection& operator = (const DBConnection&& srcConnection) = delete;
 	
 
 	static DBConnection* GetConnection(char* zErrMsg = nullptr);
-	//TODO : this function is to be modified to SetConnection
-	static DBConnection* GetConnection(std::string dbPath, char* zErrMsg);
+
+	static DBConnection* SetConnection(const std::string& dbPath, char* zErrMsg);
 
 	//TODO: to review with US-7
 
@@ -34,13 +38,15 @@ public:
 	//Destructor
 	~DBConnection();
 private:	
-	DBConnection(std::string path, char* szrErrorMsg);
+	DBConnection(const std::string& path, char* szrErrorMsg);
 	
 
 	//The DB Path
 	std::string _dbPath;
 	//The DB Pointer
 	sqlite3* _theDb = nullptr;
+
+	QSqlDatabase m_db;
 
 	//Static pointer for the connection Instance
 	static DBConnection* theCnx;

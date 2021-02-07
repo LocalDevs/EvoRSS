@@ -1,7 +1,8 @@
 #include "EvoRSS.h"
 #include <QtWidgets/QApplication>
-#include "DBConnection.h"
 
+#include "DBConnection.h"
+#include <QtSql/QSqlError>
 
 
 
@@ -9,16 +10,30 @@
 int main(int argc, char *argv[])
 {
 		char* zErrMsg = nullptr;
-	
-		DBConnection* myCnx = DBConnection::GetConnection(R"(C:\LocalDevs\EvoRSS\DBase\EvoRSS.db)", zErrMsg);
+
+	//TODO: make the path generic
+		DBConnection* myCnx = DBConnection::SetConnection(R"(C:\LocalDevs\EvoRSS\DBase\EvoRSS.db)", zErrMsg);
       
 		if (myCnx)
-			myCnx->executeQuery(R"(SELECT * FROM 'Fees')", [](void* ctx, int argc, char** argv, char** columnName) -> int
-                {
-                    //static_cast<vector<SomeClass>*>(ctx)->push_back(SomeClass());
-                    return 0;
-                }, zErrMsg);
-
+		{
+			QSqlQuery query;
+			bool success = false;
+			
+			if (query.exec("SELECT feed_id, feed_title FROM Feed"))
+			{
+				while ( query.next())
+				{
+					auto res = query.value("Feed_title");
+					res = query.value("Feed_id");
+				}
+				success = true;
+			}
+			else
+			{
+				QSqlError strError =  query.lastError();
+				auto l = strError.text();
+			}
+		}
 
     QApplication a(argc, argv);
     EvoRSS w;
